@@ -55,13 +55,18 @@ final class EditCartItemView: UIView {
         stepper.minimumValue = 0
         stepper.maximumValue = 99
         stepper.addTarget(self, action: #selector(stepperChanged), for: .valueChanged)
-
-        saveButton.setTitle("Save", for: .normal)
-        saveButton.titleLabel?.font = .boldSystemFont(ofSize: 18)
-        saveButton.backgroundColor = .systemPurple
-        saveButton.tintColor = .white
-        saveButton.layer.cornerRadius = 10
-        saveButton.contentEdgeInsets = UIEdgeInsets(top: 12, left: 30, bottom: 12, right: 30)
+        
+        var configuration = UIButton.Configuration.filled()
+        configuration.title = "Save"
+        configuration.baseBackgroundColor = .systemPurple
+        configuration.baseForegroundColor = .white
+        configuration.cornerStyle = .medium
+        configuration.contentInsets = NSDirectionalEdgeInsets(top: 12, leading: 30, bottom: 12, trailing: 30)
+        var titleAttributes = AttributeContainer()
+        titleAttributes.font = .boldSystemFont(ofSize: 18)
+        configuration.attributedTitle = AttributedString("Save", attributes: titleAttributes)
+        saveButton.configuration = configuration
+        
         saveButton.addTarget(self, action: #selector(saveTapped), for: .touchUpInside)
 
         [nameLabel, quantityLabel, stepper, saveButton].forEach { stack.addArrangedSubview($0) }

@@ -15,8 +15,14 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         _ application: UIApplication,
         didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?
     ) -> Bool {
-        // Override point for customization after application launch.
-        // Global app-level configuration goes here
+        // Configure Google Sign-In with your Client ID
+        // Extract Client ID from the reversed URL scheme in Info.plist
+        let clientID = "1013505634363-otpkhje9g2n0unlh666qucoda0pgr6g8.apps.googleusercontent.com"
+        
+        // Create configuration
+        let config = GIDConfiguration(clientID: clientID)
+        GIDSignIn.sharedInstance.configuration = config
+        
         return true
     }
     

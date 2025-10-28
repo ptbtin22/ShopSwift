@@ -6,6 +6,7 @@
 //
 
 import UIKit
+import GoogleSignIn
 
 protocol Coordinator: AnyObject {
     var navigationController: UINavigationController { get set }
@@ -44,10 +45,8 @@ class AppCoordinator: Coordinator {
     }
 
     func showLogin() {
-        print("This function was called")
         let loginVC = LoginViewController()
         loginVC.coordinator = self
-        loginVC.title = "Welcome"
         navigationController.pushViewController(loginVC, animated: false)
     }
 
@@ -57,8 +56,16 @@ class AppCoordinator: Coordinator {
     }
     
     func logout() {
-        // Clear any user data/tokens here if needed
-        // UserDefaults.standard.set(false, forKey: "isLoggedIn")
+        print("🚪 Logging out...")
+        
+        // Sign out from Google
+        GIDSignIn.sharedInstance.signOut()
+        print("✅ Signed out from Google")
+        
+        // Clear user data from UserDefaults
+        UserDefaults.standard.set(false, forKey: "isLoggedIn")
+        UserDefaults.standard.removeObject(forKey: "userEmail")
+        UserDefaults.standard.removeObject(forKey: "userName")
         
         // Get the window from SceneDelegate (reliable)
         guard let window = UIApplication.sceneDelegate?.window else {
@@ -133,6 +140,7 @@ class AppCoordinator: Coordinator {
     
     private func createMainTab() -> UINavigationController {
         let mainVC = MainViewController(productRepository: repository)
+        mainVC.coordinator = self // Inject coordinator
         mainVC.title = "Home"
         
         let homeImage = UIImage(systemName: "house")
@@ -145,6 +153,7 @@ class AppCoordinator: Coordinator {
     
     private func createFavoritesTab() -> UINavigationController {
         let favoritesVC = FavoritesViewController(api: api)
+        favoritesVC.coordinator = self // Inject coordinator
         favoritesVC.title = "Favorites"
         
         let favoritesImage = UIImage(systemName: "heart")

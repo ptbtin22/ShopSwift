@@ -1,144 +1,161 @@
-////
-////  LoginViewController.swift
-////  ShoppingApp
-////
-////  Created by Tín Phạm on 27/10/25.
-////
 //
-//import UIKit
+//  LoginViewController.swift
+//  ShoppingApp
 //
-//class LoginViewController: UIViewController {
-//    
-//    weak var coordinator: AppCoordinator?
-//    
-//    private lazy var loginButton: UIButton = {
-//        let button = UIButton()
-//        button.translatesAutoresizingMaskIntoConstraints = false
-//        button.setTitle("Login", for: .normal)
-//        button.backgroundColor = .systemPink
-//        button.layer.cornerRadius = 12
-//        button.addTarget(self, action: #selector(loginButtonTapped), for: .touchUpInside)
-//        return button
-//    }()
-//    
-//    private var loginLabel: UILabel = {
-//        let label = UILabel()
-//        label.translatesAutoresizingMaskIntoConstraints = false
-//        label.text = "Welcome to ShopSwift"
-//        label.font = .systemFont(ofSize: 28, weight: .bold)
-//        label.textAlignment = .center
-//        return label
-//    }()
-//    
-//    private var subtitleLabel: UILabel = {
-//        let label = UILabel()
-//        label.translatesAutoresizingMaskIntoConstraints = false
-//        label.text = "Login to continue shopping"
-//        label.font = .systemFont(ofSize: 16, weight: .regular)
-//        label.textColor = .secondaryLabel
-//        label.textAlignment = .center
-//        return label
-//    }()
+//  Created by Tín Phạm on 27/10/25.
 //
-//    override func viewDidLoad() {
-//        super.viewDidLoad()
-//        config()
-//    }
-//    
-//    private func config() {
-//        view.backgroundColor = .systemBackground
-//        
-//        view.addSubview(loginLabel)
-//        view.addSubview(subtitleLabel)
-//        view.addSubview(loginButton)
-//        
-//        NSLayoutConstraint.activate([
-//            loginLabel.centerXAnchor.constraint(equalTo: view.centerXAnchor),
-//            loginLabel.centerYAnchor.constraint(equalTo: view.centerYAnchor, constant: -80),
-//            loginLabel.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 20),
-//            loginLabel.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -20)
-//        ])
-//        
-//        NSLayoutConstraint.activate([
-//            subtitleLabel.topAnchor.constraint(equalTo: loginLabel.bottomAnchor, constant: 12),
-//            subtitleLabel.centerXAnchor.constraint(equalTo: view.centerXAnchor),
-//            subtitleLabel.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 20),
-//            subtitleLabel.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -20)
-//        ])
-//        
-//        NSLayoutConstraint.activate([
-//            loginButton.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor, constant: -40),
-//            loginButton.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 20),
-//            loginButton.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -20),
-//            loginButton.heightAnchor.constraint(equalToConstant: 56)
-//        ])
-//    }
-//    
-//    @objc private func loginButtonTapped() {
-//        // Simulate login (in production, you'd validate credentials here)
-//        print("🔐 Login button tapped!")
-//        
-//        // Notify coordinator that login is complete
-//        coordinator?.didFinishLogin()
-//    }
-//
-//}
 
 import UIKit
 import GoogleSignIn
 
 class LoginViewController: UIViewController {
+    
+    weak var coordinator: AppCoordinator?
+    
+    // MARK: - UI Components
+    
+    private let titleLabel: UILabel = {
+        let label = UILabel()
+        label.translatesAutoresizingMaskIntoConstraints = false
+        label.text = "Welcome to ShopSwift"
+        label.font = .systemFont(ofSize: 28, weight: .bold)
+        label.textAlignment = .center
+        label.numberOfLines = 0
+        return label
+    }()
+    
+    private let subtitleLabel: UILabel = {
+        let label = UILabel()
+        label.translatesAutoresizingMaskIntoConstraints = false
+        label.text = "Sign in to continue shopping"
+        label.font = .systemFont(ofSize: 16, weight: .regular)
+        label.textColor = .secondaryLabel
+        label.textAlignment = .center
+        return label
+    }()
+    
+    private lazy var googleSignInButton: GIDSignInButton = {
+        let button = GIDSignInButton()
+        button.translatesAutoresizingMaskIntoConstraints = false
+        button.addTarget(self, action: #selector(googleSignInTapped), for: .touchUpInside)
+        return button
+    }()
+    
+    private let activityIndicator: UIActivityIndicatorView = {
+        let indicator = UIActivityIndicatorView(style: .large)
+        indicator.translatesAutoresizingMaskIntoConstraints = false
+        indicator.hidesWhenStopped = true
+        return indicator
+    }()
 
+    // MARK: - Lifecycle
+    
     override func viewDidLoad() {
         super.viewDidLoad()
+        setupUI()
+    }
+    
+    // MARK: - UI Setup
+    
+    private func setupUI() {
+        view.backgroundColor = .systemBackground
         
-        // Add the official Google Sign-In button
-        let googleSignInButton = GIDSignInButton()
-        googleSignInButton.center = view.center
-        googleSignInButton.addTarget(self, action: #selector(googleSignInTapped), for: .touchUpInside)
+        view.addSubview(titleLabel)
+        view.addSubview(subtitleLabel)
         view.addSubview(googleSignInButton)
+        view.addSubview(activityIndicator)
+        
+        NSLayoutConstraint.activate([
+            // Title Label
+            titleLabel.centerXAnchor.constraint(equalTo: view.centerXAnchor),
+            titleLabel.centerYAnchor.constraint(equalTo: view.centerYAnchor, constant: -100),
+            titleLabel.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 40),
+            titleLabel.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -40),
+            
+            // Subtitle Label
+            subtitleLabel.topAnchor.constraint(equalTo: titleLabel.bottomAnchor, constant: 12),
+            subtitleLabel.centerXAnchor.constraint(equalTo: view.centerXAnchor),
+            subtitleLabel.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 40),
+            subtitleLabel.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -40),
+            
+            // Google Sign-In Button
+            googleSignInButton.topAnchor.constraint(equalTo: subtitleLabel.bottomAnchor, constant: 40),
+            googleSignInButton.centerXAnchor.constraint(equalTo: view.centerXAnchor),
+            googleSignInButton.heightAnchor.constraint(equalToConstant: 48),
+            
+            // Activity Indicator
+            activityIndicator.centerXAnchor.constraint(equalTo: view.centerXAnchor),
+            activityIndicator.topAnchor.constraint(equalTo: googleSignInButton.bottomAnchor, constant: 20)
+        ])
     }
 
-    @objc func googleSignInTapped() {
-        // 1. Get the top-most view controller to present the login screen
-        guard let presentingViewController = self.view.window?.rootViewController else { return }
-
-        // 2. Start the sign-in flow
-        GIDSignIn.sharedInstance.signIn(withPresenting: presentingViewController) { result, error in
+    // MARK: - Google Sign-In
+    
+    @objc private func googleSignInTapped() {
+        print("🔵 Google Sign-In button tapped")
+        
+        // Show loading indicator
+        activityIndicator.startAnimating()
+        googleSignInButton.isEnabled = false
+        
+        // Use self as the presenting view controller (correct approach)
+        GIDSignIn.sharedInstance.signIn(withPresenting: self) { [weak self] result, error in
+            guard let self = self else { return }
             
-            // 3. Handle the result
-            guard error == nil else {
-                // An error occurred
-                print("Error signing in: \(error!.localizedDescription)")
+            // Stop loading
+            DispatchQueue.main.async {
+                self.activityIndicator.stopAnimating()
+                self.googleSignInButton.isEnabled = true
+            }
+            
+            // Handle errors
+            if let error = error {
+                print("❌ Google Sign-In error: \(error.localizedDescription)")
+                self.showAlert(title: "Sign-In Failed", message: error.localizedDescription)
                 return
             }
-
+            
+            // Check if we have a result
             guard let signInResult = result else {
-                // The flow was cancelled by the user
-                print("Sign-in cancelled.")
+                print("⚠️ Sign-in cancelled by user")
                 return
             }
-
-            // If we are here, sign-in was successful!
-            let user = signInResult.user
             
-            print("Successfully signed in as \(user.profile?.name ?? "User")!")
-
-            // Get user information
-            let email = user.profile?.email
-            let fullName = user.profile?.name
-            let givenName = user.profile?.givenName
-            let familyName = user.profile?.familyName
-            let profilePicUrl = user.profile?.imageURL(withDimension: 320)
-
-            // IMPORTANT: Get the ID Token to send to your backend server
+            // Successfully signed in!
+            let user = signInResult.user
+            let profile = user.profile
+            
+            print("✅ Successfully signed in!")
+            print("👤 Name: \(profile?.name ?? "Unknown")")
+            print("📧 Email: \(profile?.email ?? "Unknown")")
+            
+            // Get ID Token (important for backend verification)
             if let idToken = user.idToken?.tokenString {
-                print("User ID Token: \(idToken)")
-                // Send this idToken to your backend server to verify the user
+                print("🔑 ID Token: \(idToken)")
+                #warning("TODO: Send this token to your backend for verification")
+                // Example: AuthService.shared.verifyGoogleToken(idToken)
             }
             
-            // Now you can navigate to the main part of your app
-            // self.showMainAppScreen()
+            // Store user info if needed
+            UserDefaults.standard.set(true, forKey: "isLoggedIn")
+            UserDefaults.standard.set(profile?.email, forKey: "userEmail")
+            UserDefaults.standard.set(profile?.name, forKey: "userName")
+            
+            // Navigate to main app via coordinator
+            print("🚀 Navigating to main app...")
+            self.coordinator?.didFinishLogin()
         }
+    }
+    
+    // MARK: - Helper Methods
+    
+    private func showAlert(title: String, message: String) {
+        let alert = UIAlertController(
+            title: title,
+            message: message,
+            preferredStyle: .alert
+        )
+        alert.addAction(UIAlertAction(title: "OK", style: .default))
+        present(alert, animated: true)
     }
 }
