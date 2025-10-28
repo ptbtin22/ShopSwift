@@ -20,12 +20,15 @@ jobs:
     - name: Set up Xcode
       uses: maxim-lobanov/setup-xcode@v1
       with:
-        xcode-version: '16.1'  # Match your local Xcode version
-
+        xcode-version: 'latest-stable'  # Use latest stable Xcode on runner
+    
     - name: Show Xcode and Swift version
       run: |
         xcodebuild -version
         swift --version
+        
+    - name: List available simulators
+      run: xcrun simctl list devices available | grep iPhone
 
     - name: Cache Swift Package Manager dependencies
       uses: actions/cache@v4
@@ -48,7 +51,7 @@ jobs:
         xcodebuild clean build \
           -project ShoppingApp.xcodeproj \
           -scheme ShoppingApp \
-          -destination 'platform=iOS Simulator,name=iPhone 16 Pro' \
+          -destination 'platform=iOS Simulator,name=Any iPhone' \
           -configuration Debug \
           -derivedDataPath DerivedData \
           CODE_SIGN_IDENTITY="" \
@@ -60,7 +63,7 @@ jobs:
         xcodebuild test \
           -project ShoppingApp.xcodeproj \
           -scheme ShoppingApp \
-          -destination 'platform=iOS Simulator,name=iPhone 16 Pro' \
+          -destination 'platform=iOS Simulator,name=Any iPhone' \
           -derivedDataPath DerivedData \
           -enableCodeCoverage YES \
           CODE_SIGN_IDENTITY="" \
