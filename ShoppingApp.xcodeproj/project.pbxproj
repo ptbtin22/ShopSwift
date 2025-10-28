@@ -12,6 +12,7 @@
 		94E7ECD92EAA879400E2D3A2 /* RxRelay in Frameworks */ = {isa = PBXBuildFile; productRef = 94E7ECD82EAA879400E2D3A2 /* RxRelay */; };
 		94E7ECDB2EAA879400E2D3A2 /* RxSwift in Frameworks */ = {isa = PBXBuildFile; productRef = 94E7ECDA2EAA879400E2D3A2 /* RxSwift */; };
 		94E7ECDD2EAA879400E2D3A2 /* RxTest in Frameworks */ = {isa = PBXBuildFile; productRef = 94E7ECDC2EAA879400E2D3A2 /* RxTest */; };
+		D239013A2EB11AB6004E0768 /* GoogleSignIn in Frameworks */ = {isa = PBXBuildFile; productRef = D23901392EB11AB6004E0768 /* GoogleSignIn */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -74,6 +75,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				94E7ECDB2EAA879400E2D3A2 /* RxSwift in Frameworks */,
+				D239013A2EB11AB6004E0768 /* GoogleSignIn in Frameworks */,
 				94E7ECD92EAA879400E2D3A2 /* RxRelay in Frameworks */,
 				94E7ECD72EAA879400E2D3A2 /* RxCocoa in Frameworks */,
 			);
@@ -217,6 +219,7 @@
 			minimizedProjectReferenceProxies = 1;
 			packageReferences = (
 				94E7ECD32EAA879400E2D3A2 /* XCRemoteSwiftPackageReference "RxSwift" */,
+				D23901382EB11AB6004E0768 /* XCRemoteSwiftPackageReference "GoogleSignIn-iOS" */,
 			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = 9434F1D52E9AB78F00C6176D /* Products */;
@@ -310,7 +313,7 @@
 					"@executable_path/Frameworks",
 				);
 				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = com.shopback.ShoppingApp;
+				PRODUCT_BUNDLE_IDENTIFIER = com.tinpham.ShopSwift;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_VERSION = 5.0;
@@ -336,7 +339,7 @@
 					"@executable_path/Frameworks",
 				);
 				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = com.shopback.ShoppingApp;
+				PRODUCT_BUNDLE_IDENTIFIER = com.tinpham.ShopSwift;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_VERSION = 5.0;
@@ -581,6 +584,14 @@
 				minimumVersion = 6.9.0;
 			};
 		};
+		D23901382EB11AB6004E0768 /* XCRemoteSwiftPackageReference "GoogleSignIn-iOS" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/google/GoogleSignIn-iOS.git";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 9.0.0;
+			};
+		};
 /* End XCRemoteSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
@@ -608,6 +619,11 @@
 			isa = XCSwiftPackageProductDependency;
 			package = 94E7ECD32EAA879400E2D3A2 /* XCRemoteSwiftPackageReference "RxSwift" */;
 			productName = RxTest;
+		};
+		D23901392EB11AB6004E0768 /* GoogleSignIn */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = D23901382EB11AB6004E0768 /* XCRemoteSwiftPackageReference "GoogleSignIn-iOS" */;
+			productName = GoogleSignIn;
 		};
 /* End XCSwiftPackageProductDependency section */
 	};

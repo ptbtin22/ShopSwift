@@ -6,6 +6,7 @@
 //
 
 import UIKit
+import GoogleSignIn
 
 class SceneDelegate: UIResponder, UIWindowSceneDelegate {
     
@@ -13,6 +14,10 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
     var appCoordinator: AppCoordinator?
     
     // MARK: - Scene Lifecycle
+    func scene(_ scene: UIScene, openURLContexts URLContexts: Set) {
+        guard let url = URLContexts.first?.url else { return }
+        GIDSignIn.sharedInstance.handle(url)
+    }
     
     func scene(
         _ scene: UIScene,
