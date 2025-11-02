@@ -7,10 +7,21 @@
 
 import UIKit
 import GoogleSignIn
+import FirebaseAuth
 
 class LoginViewController: UIViewController {
     
     weak var coordinator: AppCoordinator?
+    private let userRepository: UserRepository
+    
+    init(userRepository: UserRepository = FirestoreUserRepository()) {
+        self.userRepository = userRepository
+        super.init(nibName: nil, bundle: nil)
+    }
+    
+    required init?(coder: NSCoder) {
+        fatalError("init(coder:) has not been implemented")
+    }
     
     // MARK: - UI Components
     
@@ -110,40 +121,80 @@ class LoginViewController: UIViewController {
             
             // Handle errors
             if let error = error {
-                print("❌ Google Sign-In error: \(error.localizedDescription)")
+                print("[LOG] Google Sign-In error: \(error.localizedDescription)")
                 self.showAlert(title: "Sign-In Failed", message: error.localizedDescription)
                 return
             }
             
             // Check if we have a result
-            guard let signInResult = result else {
-                print("⚠️ Sign-in cancelled by user")
+            guard let signInResult = result,
+                  let idToken = signInResult.user.idToken?.tokenString else {
+                print("[LOG] Failed to get ID token")
                 return
             }
             
-            // Successfully signed in!
-            let user = signInResult.user
-            let profile = user.profile
+            print("[LOG] User has image: \(String(describing: signInResult.user.profile?.hasImage))")
             
-            print("✅ Successfully signed in!")
-            print("👤 Name: \(profile?.name ?? "Unknown")")
-            print("📧 Email: \(profile?.email ?? "Unknown")")
-            
-            // Get ID Token (important for backend verification)
-            if let idToken = user.idToken?.tokenString {
-                print("🔑 ID Token: \(idToken)")
-                #warning("TODO: Send this token to your backend for verification")
-                // Example: AuthService.shared.verifyGoogleToken(idToken)
+            do {
+                try KeychainHelper.shared.save(key: "googleIDToken", string: idToken)
+                print("[LOG] Saved ID token to Keychain")
+            } catch {
+                print("[LOG] Failed to save token: \(error)")
             }
             
-            // Store user info if needed
-            UserDefaults.standard.set(true, forKey: "isLoggedIn")
-            UserDefaults.standard.set(profile?.email, forKey: "userEmail")
-            UserDefaults.standard.set(profile?.name, forKey: "userName")
+            let credential = GoogleAuthProvider.credential(
+                withIDToken: idToken,
+                accessToken: signInResult.user.accessToken.tokenString
+            )
             
-            // Navigate to main app via coordinator
-            print("🚀 Navigating to main app...")
-            self.coordinator?.didFinishLogin()
+            Auth.auth().signIn(with: credential) { [weak self] authResult, error in
+                guard let self = self else { return }
+                
+                if let error = error {
+                    // Print full error details for debugging
+                    print("❌ Firebase Auth Error:")
+                    print("   Description: \(error.localizedDescription)")
+                    print("   Error: \(error)")
+                    if let nsError = error as NSError? {
+                        print("   Domain: \(nsError.domain)")
+                        print("   Code: \(nsError.code)")
+                        print("   UserInfo: \(nsError.userInfo)")
+                    }
+                    
+                    self.showAlert(
+                        title: "Authentication Failed",
+                        message: "Please make sure Google Sign-In is enabled in Firebase Console.\n\nError: \(error.localizedDescription)"
+                    )
+                    return
+                }
+                
+                guard let firebaseUser = authResult?.user else { return }
+                
+                let user = User(
+                    uid: firebaseUser.uid,
+                    email: firebaseUser.email ?? "",
+                    displayName: firebaseUser.displayName,
+                    photoURL: firebaseUser.photoURL,
+                    createdAt: Date()
+                )
+                
+                Task {
+                    do {
+                        try await self.userRepository.saveUser(user)
+                        print("[LOG] User saved to Firestore")
+                        
+                        UserDefaults.standard.set(true, forKey: "isLoggedIn")
+                        UserDefaults.standard.set(user.email, forKey: "userEmail")
+                        UserDefaults.standard.set(user.displayName, forKey: "userName")
+                        
+                        await MainActor.run {
+                            self.coordinator?.didFinishLogin()
+                        }
+                    } catch {
+                        print("[LOG] Failed to save user: \(error.localizedDescription)")
+                    }
+                }
+            }
         }
     }
     

@@ -41,7 +41,11 @@ class AppCoordinator: Coordinator {
 
     func start() {
         // Start with login screen
-        showLogin()
+        if (Auth.auth().currentUser != nil) {
+            showMainApp()
+        } else {
+            showLogin()
+        }
     }
 
     func showLogin() {

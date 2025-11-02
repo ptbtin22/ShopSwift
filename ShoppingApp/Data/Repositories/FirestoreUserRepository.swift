@@ -10,6 +10,7 @@ import FirebaseFirestore
 
 final class FirestoreUserRepository: UserRepository {
     private let db = Firestore.firestore()
+    private let collection = "users"
     
     func saveUser(_ user: User) async throws {
         let dto = UserProfileDTO(
@@ -21,13 +22,13 @@ final class FirestoreUserRepository: UserRepository {
             lastLoginAt: Timestamp(date: Date())
         )
         
-        try db.collection("users")
+        try db.collection(collection)
             .document(user.uid)
             .setData(from: dto, merge: true)
     }
     
     func getUser(uid: String) async throws -> User? {
-        let snapshot = try await db.collection("users")
+        let snapshot = try await db.collection(collection)
             .document(uid)
             .getDocument()
         
@@ -45,7 +46,7 @@ final class FirestoreUserRepository: UserRepository {
     }
     
     func deleteUser(uid: String) async throws {
-        try await db.collection("users")
+        try await db.collection(collection)
             .document(uid)
             .delete()
     }
